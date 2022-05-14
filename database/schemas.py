@@ -21,6 +21,12 @@ class BookBase(BaseModel):
 class BookData(BookBase):
     authors: List[AuthorBase]
 
+    class Config:
+        orm_mode = True
+
 
 class AuthorData(AuthorBase):
     books: List[BookBase]
+
+    class Config:
+        orm_mode = True

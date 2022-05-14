@@ -20,7 +20,7 @@ class Author(Base):
     books = relationship("Book", secondary=association_table, back_populates="authors")
 
     def __str__(self) -> str:
-        return f"{self.first_name} {self.second_name}"
+        return f"{self.name}"
 
 
 class Book(Base):
@@ -33,4 +33,4 @@ class Book(Base):
     authors = relationship("Author", secondary=association_table, back_populates="books")
 
     def __str__(self) -> str:
-        return self.title
+        return f"{self.title}, {self.authors}"
