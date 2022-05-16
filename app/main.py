@@ -90,9 +90,7 @@ async def delete_author(id: int, db: Session = Depends(get_db)):
     """
     pass
 
-# TODO: done this API
-# TODO: write test for this API
-# TODO: commit to github
+
 @app.post("/book", response_model=schemas.BookData, status_code=201)
 async def create_book(book: schemas.BookData, db: Session = Depends(get_db)):
     """
@@ -162,6 +160,8 @@ async def delete_book(number: int, db: Session = Depends(get_db)):
     Delete book by number
     """
     book = db.query(models.Book).filter(models.Book.number == number).first()
+    if not book:
+        raise HTTPException(status_code=400, detail="Book doesn't exist")
     serializer_book = schemas.BookData(
         title=book.title,
         description=book.description,
