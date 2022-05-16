@@ -18,13 +18,11 @@ def create_task(task_type):
 
 @celery.task(name="new_task")
 def new_task(task):
-    with open('readme.txt', 'a') as f:
-        f.write(str(task))
-    # payload = {
-    #     "text": task
-    # }
-# 
-    # r = requests.post("http://0.0.0.0:5000/new", data=json.dumps(payload))
+    payload = {
+        "text": task
+    }
+
+    r = requests.post("http://0.0.0.0:5000/new", data=json.dumps(payload))
     return True
 
 # payload = {

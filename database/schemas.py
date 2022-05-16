@@ -13,6 +13,7 @@ class AuthorBase(BaseModel):
 class BookBase(BaseModel):
     title: str
     description: str
+    number: int
 
     class Config:
         orm_mode = True
