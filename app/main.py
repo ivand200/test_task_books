@@ -5,11 +5,9 @@
 # TODO: raise HTTPException
 # TODO: add logging
 # TODO: tests
+# TODO: add JWT Auth
 
-from pydoc import describe
 from typing import List
-
-from yaml import serialize
 
 from fastapi import FastAPI, Depends, HTTPException, Body, Form, Request
 from fastapi.responses import JSONResponse
@@ -20,7 +18,7 @@ from celery.result import AsyncResult
 
 from database.db import Base, engine, get_db
 from database import models, schemas
-from .worker import create_task, new_task
+from celery_work.worker import new_task
 
 
 app = FastAPI()
@@ -33,27 +31,13 @@ async def home():
     return "Home"
 
 
-@app.post("/tasks", status_code=201)
-def run_task(payload = Body(...)):
-    """
-    TEST Celery
-    """
-    task_type = payload["type"]
-    task = create_task.delay(int(task_type))
-    return JSONResponse({"task_id": task.id})
-
-
 @app.post("/test", status_code=201)
-def test_task(payload = Body(...)):
+def run_celery(payload = Body(...)):
+    """
+    test celery
+    """
     task_type = payload["text"]
-    task = new_task(str(task_type))
-    return task
-    # return JSONResponse({"task_id": task.id})
-
-
-@app.post("/new", status_code=201)
-def celery_task(payload = Body(...)):
-    print(f"{payload['text']}")
+    task = new_task.delay(task_type)
     return "ok"
 
 
@@ -96,7 +80,9 @@ async def create_book(book: schemas.BookData, db: Session = Depends(get_db)):
     """
     Create a book
     """
-    check_book = db.query(models.Book).filter(models.Book.title == book.title).first()
+    check_book = (
+        db.query(models.Book).filter(models.Book.title == book.title).first()
+    )
     if check_book:
         raise HTTPException(status_code=400, detail="Book already exists")
     new_book = models.Book(
