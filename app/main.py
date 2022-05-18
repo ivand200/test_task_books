@@ -8,6 +8,7 @@
 # TODO: add JWT Auth
 
 from typing import List
+import logging
 
 from fastapi import FastAPI, Depends, HTTPException, Body, Form, Request
 from fastapi.responses import JSONResponse
@@ -25,9 +26,19 @@ app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
 
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+format = logging.Formatter(
+    "%(asctime)s | %(name)s | %(message)s"
+)
+handler.setFormatter(format)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 @app.get("/")
 async def home():
+    logger.info("Home")
     return "Home"
 
 
@@ -89,6 +100,7 @@ async def create_book(book: schemas.BookData, db: Session = Depends(get_db)):
         title=book.title, description=book.description, number=book.number
     )
     authors = [schemas.AuthorBase(**i.__dict__) for i in book.authors]
+    logger.info(f"Create a new book {book.title}, {book.authors}, {book.number}")
     for author in authors:
         check_author = (
             db.query(models.Author).filter(models.Author.name == author.name).first()
@@ -156,4 +168,5 @@ async def delete_book(number: int, db: Session = Depends(get_db)):
     )
     db.delete(book)
     db.commit()
+    logger.info(f"book number: {book.number} was deleted")
     return serializer_book
